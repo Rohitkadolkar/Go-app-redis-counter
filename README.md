@@ -1,4 +1,4 @@
-# Zerodha Ops Task
+# Ops Task
 
 ## Description
 
