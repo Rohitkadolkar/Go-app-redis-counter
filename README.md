@@ -112,6 +112,7 @@ Now to access it, Go to your browser and type http://localhost
 You can reload the page and see the Redis counter increasing.
 
 
+Thank you! PLease feel free to reach out to me if you face any issues.
 
 
 
