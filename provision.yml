@@ -1,0 +1,124 @@
+---
+- name: Provision and Configure VM
+  hosts: all
+  become: yes
+  tasks:
+    - name: Set hostname to demo-ops
+      hostname:
+        name: demo-ops
+
+    - name: Create user 'demo'
+      user:
+        name: demo
+        state: present
+        createhome: yes
+
+    - name: Disable root login
+      replace:
+        path: /etc/ssh/sshd_config
+        regexp: '^PermitRootLogin.*'
+        replace: 'PermitRootLogin no'
+      notify: restart sshd
+
+    - name: Install UFW (Uncomplicated Firewall)
+      apt:
+        name: ufw
+        state: present
+
+    - name: Allow SSH through UFW
+      ufw:
+        rule: allow
+        name: OpenSSH
+      notify: enable ufw
+
+    - name: Enable UFW
+      ufw:
+        state: enabled
+
+    - name: Increase open files limit using sysctl
+      sysctl:
+        name: fs.file-max
+        value: 65535
+      register: file_max
+
+    - name: Document sysctl change
+      copy:
+        content: "fs.file-max = 65535"
+        dest: /etc/sysctl.d/99-demo-ops.conf
+
+    - name: Set system timezone to Asia/Kolkata
+      timezone:
+        name: Asia/Kolkata
+
+    - name: Install Docker and Docker-Compose
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - docker.io
+        - docker-compose
+
+    - name: Configure Docker Daemon with sane defaults
+      copy:
+        src: /var/lib/docker/daemon.json
+        dest: /etc/docker/daemon.json
+      notify: restart docker
+
+    - name: Ensure /etc/demo-ops directory exists
+      file:
+        path: /etc/demo-ops
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Deploy docker-compose.yml
+      copy:
+        src: ./docker-compose.yml
+        dest: /etc/demo-ops/docker-compose.yml
+
+    - name: Deploy Dockerfile
+      copy:
+        src: ./Dockerfile
+        dest: /etc/demo-ops/Dockerfile
+
+    - name: Deploy go.mod
+      copy:
+        src: ./go.mod
+        dest: /etc/demo-ops/go.mod
+
+    - name: Deploy nginx.conf
+      copy:
+        src: ./nginx.conf
+        dest: /etc/demo-ops/nginx.conf
+
+    - name: main.go
+      copy:
+        src: ./main.go
+        dest: /etc/demo-ops/main.go
+
+    - name: Deploy go.sum 
+      copy:
+        src: ./go.sum
+        dest: /etc/demo-ops/go.sum
+
+
+    - name: Start Docker services
+      command: docker-compose -f /etc/demo-ops/docker-compose.yml up -d
+
+
+  handlers:
+    - name: restart sshd
+      service:
+        name: ssh
+        state: restarted
+      ignore_errors: yes
+
+    - name: restart docker
+      service:
+        name: docker
+        state: restarted
+      ignore_errors: yes
+
+    - name: enable ufw
+      command: ufw enable

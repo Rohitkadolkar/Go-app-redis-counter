@@ -1,50 +1,54 @@
 #!/bin/bash
+set -e
 
-# Function to check if a command exists
-command_exists() {
-  command -v "$1" >/dev/null 2>&1
+package_installed() {
+    dpkg -l | grep -q "^ii\s*$1\s"
 }
 
-# Check if Vagrant is installed, and if not, install it
-install_vagrant() {
-  if ! command_exists vagrant; then
-    echo "Vagrant is not installed. Installing Vagrant..."
-
-    # Install Vagrant using the official installer
-    if [ "$(uname -s)" = "Linux" ]; then
-      # Linux installation
-      sudo apt update
-      sudo apt install vagrant -y
-    elif [ "$(uname -s)" = "Darwin" ]; then
-      # macOS installation
-      brew cask install vagrant
+run_with_sudo() {
+    if [ "$EUID" -ne 0 ]; then
+        sudo "$@"
     else
-      echo "Unsupported operating system. Please install Vagrant manually: https://www.vagrantup.com/downloads.html"
-      exit 1
+        "$@"
     fi
-
-    echo "Vagrant has been installed."
-  fi
 }
 
-# Error check and exit on failure
-check_command() {
-  if ! command_exists "$1"; then
-    echo "Error: $1 is not installed. Please install it and rerun the script."
-    exit 1
-  fi
-}
+if ! package_installed vagrant; then
+    echo "Installing Vagrant..."
+    run_with_sudo apt-get update
+    run_with_sudo apt-get install -y vagrant
+else
+    echo "Vagrant is already installed."
+fi
 
-# Install Vagrant if not already installed
-install_vagrant
+if ! package_installed virtualbox; then
+    echo "Installing VirtualBox..."
+    run_with_sudo apt-get update
+    run_with_sudo apt-get install -y virtualbox
+else
+    echo "VirtualBox is already installed."
+fi
 
-# Check if VirtualBox is installed
-check_command VBoxManage
+if ! vagrant box list | grep -q "ubuntu/bionic64"; then
+    echo "Adding 'ubuntu/bionic64' Vagrant box..."
+    vagrant box add ubuntu/bionic64
+else
+    echo "'ubuntu/bionic64' Vagrant box is already added."
+fi
 
-# Define the Vagrant box name and URL (adjust as needed)
-BOX_NAME="ubuntu/bionic64"
-BOX_URL="https://app.vagrantup.com/ubuntu/boxes/bionic64"
+if [ ! -f Vagrantfile ]; then
+    echo "Initializing Vagrant environment..."
+    vagrant init ubuntu/bionic64
+else
+    echo "Vagrant environment is already initialized."
+fi
 
-# Initialize the Vagrant environment if not already initialized
-if [ ! -f V
+if ! vagrant status | grep -q "running"; then
+    echo "Starting the Vagrant VM..."
+    vagrant up
+else
+    echo "Vagrant VM is already running."
+fi
 
+
+echo "Vagrant setup completed."
