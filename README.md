@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 # Go-app-redis-counter
 
 # DevOps Task
@@ -118,6 +119,9 @@ You can reload the page and see the Redis counter increasing.
 
 =======
 # Zerodha Ops Task
+=======
+# Ops Task
+>>>>>>> d33db98 (Update README.md)
 
 ## Description
 
