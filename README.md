@@ -38,7 +38,7 @@ sudo ./setup_vagrant.sh
 You will need to use sudo with vagrant commands as well because we have created vagrant using user sudo.
 
 Once Vagrant is setup, it will already be up as it is included in the script.
-Open Vagrantfile and add the following configurations :
+Open Vagrantfile and make changes so that configuration looks something like this :
 ```
 Vagrant.configure("2") do |config|
 
