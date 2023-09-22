@@ -1,6 +1,6 @@
 # Go-app-redis-counter
 
-# Zerodha Ops Task
+# DevOps Task
 
 This repository contains the implementation of a DevOps task, including the setup of a Go application with Docker and Docker Compose, Vagrant provisioning with Ansible, and additional configurations.
 
