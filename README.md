@@ -11,8 +11,6 @@ Before you begin, ensure you have met the following requirements:
 - [Go](https://golang.org/doc/install) installed for building the Go application.
 - [Docker](https://docs.docker.com/get-docker/) installed for containerization.
 - [Docker Compose](https://docs.docker.com/compose/install/) installed for orchestrating containers.
-- [Vagrant](https://www.vagrantup.com/docs/installation) installed for creating a virtual machine.
-- A virtualization provider like [VirtualBox](https://www.virtualbox.org/) installed (needed for Vagrant).
 
 ## Project Structure
 
